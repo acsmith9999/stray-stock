@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model components {
+  component_id           BigInt                   @id @default(autoincrement())
+  component_name         String?                  @db.String(50)
+  stock_amount           BigInt?
+  product_components     product_components[]
+  stock_order_components stock_order_components[]
+}
+
+model components_suppliers {
+  component_id BigInt
+  supplier_id  BigInt
+
+  @@id([component_id, supplier_id], map: "pk_components_suppliers")
+}
+
+model product_components {
+  product_id         BigInt
+  component_id       BigInt
+  component_quantity BigInt?
+  components         components @relation(fields: [component_id], references: [component_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_component")
+  products           products   @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_product")
+
+  @@id([product_id, component_id], map: "pk_product_components")
+}
+
+model products {
+  product_id         BigInt               @id @default(autoincrement())
+  product_name       String               @db.String(50)
+  stock_amount       BigInt               @default(0)
+  price              Decimal              @default(0) @db.Decimal
+  product_components product_components[]
+  sale_product       sale_product[]
+  wholesale_product  wholesale_product[]
+}
+
+model retailer {
+  retailer_id       BigInt              @id @default(autoincrement())
+  retailer_name     String              @db.String(50)
+  retailer_phone    BigInt?
+  wholesale_product wholesale_product[]
+}
+
+model sale_product {
+  product_id     BigInt
+  sale_source_id BigInt
+  sale_id        BigInt
+  quantity       BigInt?     @default(0)
+  order_value    Decimal?    @db.Decimal
+  sales          sales       @relation(fields: [sale_id], references: [sale_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sale")
+  products       products    @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sale_product")
+  sale_source    sale_source @relation(fields: [sale_source_id], references: [sale_source_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sale_source")
+
+  @@id([product_id, sale_id], map: "pk_sale_product")
+}
+
+model sale_source {
+  sale_source_id   BigInt         @id @default(autoincrement())
+  sale_source_name String?        @db.String(50)
+  sale_product     sale_product[]
+}
+
+model sales {
+  sale_id      BigInt         @id @default(autoincrement())
+  sale_date    DateTime?      @db.Date
+  sale_value   Decimal?       @db.Decimal
+  sale_product sale_product[]
+}
+
+model stock_order {
+  order_id               BigInt                   @id @default(autoincrement())
+  order_date             DateTime?                @db.Date
+  order_total            Decimal?                 @db.Decimal
+  supplier_id            BigInt
+  suppliers              suppliers                @relation(fields: [supplier_id], references: [supplier_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_supplier")
+  stock_order_components stock_order_components[]
+}
+
+model stock_order_components {
+  order_id              BigInt
+  component_id          BigInt
+  quantity              BigInt?     @default(0)
+  component_order_value Decimal?    @db.Decimal
+  components            components  @relation(fields: [component_id], references: [component_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_order_component")
+  stock_order           stock_order @relation(fields: [order_id], references: [order_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_stock_order")
+
+  @@id([order_id, component_id], map: "pk_stock_order_components")
+}
+
+model suppliers {
+  supplier_id    BigInt        @id @default(autoincrement())
+  supplier_name  String        @db.String(50)
+  supplier_phone BigInt?
+  supplier_email String?       @db.String(50)
+  stock_order    stock_order[]
+}
+
+model wholesale_product {
+  product_id   BigInt
+  wholesale_id BigInt
+  retailer_id  BigInt
+  quantity     BigInt?    @default(0)
+  order_value  Decimal?   @db.Decimal
+  retailer     retailer   @relation(fields: [retailer_id], references: [retailer_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_retailer")
+  wholesales   wholesales @relation(fields: [wholesale_id], references: [wholesale_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_wholesale")
+  products     products   @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_wholesale_product")
+
+  @@id([product_id, wholesale_id], map: "pk_wholesale_product")
+}
+
+model wholesales {
+  wholesale_id      BigInt              @id @default(autoincrement())
+  sale_date         DateTime?           @db.Date
+  sale_value        Decimal?            @db.Decimal
+  wholesale_product wholesale_product[]
+}
