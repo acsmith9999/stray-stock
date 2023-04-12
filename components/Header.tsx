@@ -11,7 +11,27 @@ const Header: React.FC = () => {
     <div className="left">
       <Link href="/">
         <a className="bold" data-active={isActive("/")}>
-          Feed
+          Products
+        </a>
+      </Link>
+      <Link href="/components">
+        <a className="bold" data-active={isActive("/components")}>
+          Components
+        </a>
+      </Link>
+      <Link href="/stockists">
+        <a className="bold" data-active={isActive("/stockists")}>
+          Stockists
+        </a>
+      </Link>
+      <Link href="/orders">
+        <a className="bold" data-active={isActive("/orders")}>
+          Orders
+        </a>
+      </Link>
+      <Link href="/sales">
+        <a className="bold" data-active={isActive("/sales")}>
+          Sales
         </a>
       </Link>
       <style jsx>{`

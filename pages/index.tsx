@@ -20,10 +20,6 @@ export const getStaticProps: GetStaticProps = async () => {
   }
 }
 
-// type Props = {
-//   feed: ProductProps[]
-// }
-
 type Props = {
   body: string
 }
@@ -33,7 +29,7 @@ const Blog: React.FC<Props> = (props) => {
   return (
     <Layout>
       <div className="page">
-        <h1>Public Feed</h1>
+        <h1>Products List</h1>
         <main>
           {feed.map((product) => (
             <div key={product.product_id} className="post">
