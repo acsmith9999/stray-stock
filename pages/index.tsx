@@ -63,11 +63,6 @@ const Blog: React.FC<Props> = (props) => {
         <h1>Products List</h1>
         <main>
           <ProductTable products={props.body}/>
-          {/* {feed.map((product) => (
-            <div key={product.product_id} className="post">
-              <Product product={product} />
-            </div>
-          ))} */}
         </main>
       </div>
 

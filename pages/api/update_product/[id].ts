@@ -3,15 +3,24 @@ import prisma from '../../../lib/prisma';
 
 // PUT /api/publish/:id
 export default async function handle(req, res) {
-  const productId = req.query.id;
-  console.log(productId);
+  // const productId = BigInt(req.query.id);
 
-  const { pid, pname, pstock, pprice } = req.body;
+  const { productId, pname, pstock, pprice } = req.body;
+  const id = BigInt(productId);
+ 
   const post = await prisma.products.update({
-    where: { product_id: pid },
+    where: { product_id: id },
     data: { product_name: pname,
         stock_amount: pstock,
         price: pprice, },
   });
-  res.json(post);
+  
+  const json = JSON.stringify(post, (key, value) => {
+    if (typeof value === 'bigint') {
+      return value.toString();
+    }
+    return value;
+  });
+  
+  res.json(json);
 }

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Router from "next/router";
 import ReactMarkdown from "react-markdown";
 import getServerSideProps from "../pages/api/update_product/[id]";
@@ -19,7 +19,6 @@ const ProductTable: React.FC<Props> = ({ products }) => {
     const feed = JSON.parse(products);
     const [editableRows, setEditableRows] = useState<{ [key: string]: boolean }>({});
 
-
     async function handleUpdate(productId: string): Promise<void> {
       const editable = editableRows[productId];
     
@@ -32,7 +31,6 @@ const ProductTable: React.FC<Props> = ({ products }) => {
         const pname = nameInput.value;
         const pstock = parseInt(stockInput.value);
         const pprice = parseFloat(priceInput.value);
-        const pid = parseInt(productId);
     
         // Make the PUT request to update the product
         const response = await fetch(`/api/update_product/${productId}`, {
@@ -40,12 +38,27 @@ const ProductTable: React.FC<Props> = ({ products }) => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ pid, pname, pstock, pprice }),
+          body: JSON.stringify({ productId, pname, pstock, pprice }),
         });
     
         if (response.ok) {
-          // Update the editableRows state to indicate that this row is no longer editable
-          setEditableRows({ ...editableRows, [productId]: false });
+            // Retrieve the updated product data from the server
+            // const updatedProductResponse = await fetch(`/api/products/${productId}`);
+            // const updatedProduct = await updatedProductResponse.json();
+
+            // // Update the corresponding row in the table with the new data
+            // const row = document.getElementById(`row-${productId}`);
+            // const nameCell = row.querySelector(`#name-${productId}`) as HTMLTableCellElement;
+            // const stockCell = row.querySelector(`#stock-${productId}`) as HTMLTableCellElement;
+            // const priceCell = row.querySelector(`#price-${productId}`) as HTMLTableCellElement;
+
+            // nameCell.textContent = updatedProduct.product_name;
+            // stockCell.textContent = updatedProduct.stock_amount.toString();
+            // priceCell.textContent = updatedProduct.price.toString();
+
+            // Update the editableRows state to indicate that this row is no longer editable
+            setEditableRows({ ...editableRows, [productId]: false });
+            alert("Success");
         }
       } else {
         // Set this row as editable
@@ -72,7 +85,7 @@ const ProductTable: React.FC<Props> = ({ products }) => {
         </thead>
         <tbody>
             {feed.map((product) => (
-                <tr key={product.product_id}>
+                <tr key={product.product_id} id={`row-${product.product_id}`}>
                     <td>
                         {editableRows[product.product_id] ? (
                             <input type="text" defaultValue={product.product_name} id={`name-${product.product_id}`}/>
