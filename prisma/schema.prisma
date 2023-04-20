@@ -26,8 +26,8 @@ model product_components {
   product_id         BigInt
   component_id       BigInt
   component_quantity BigInt?
-  components         components @relation(fields: [component_id], references: [component_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_component")
-  products           products   @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_product")
+  components         components @relation(fields: [component_id], references: [component_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_component")
+  products           products   @relation(fields: [product_id], references: [product_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_product")
 
   @@id([product_id, component_id], map: "pk_product_components")
 }
@@ -55,9 +55,9 @@ model sale_product {
   sale_id        BigInt
   quantity       BigInt?     @default(0)
   order_value    Decimal?    @db.Decimal
-  sales          sales       @relation(fields: [sale_id], references: [sale_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sale")
-  products       products    @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sale_product")
-  sale_source    sale_source @relation(fields: [sale_source_id], references: [sale_source_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sale_source")
+  sales          sales       @relation(fields: [sale_id], references: [sale_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_sale")
+  products       products    @relation(fields: [product_id], references: [product_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_sale_product")
+  sale_source    sale_source @relation(fields: [sale_source_id], references: [sale_source_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_sale_source")
 
   @@id([product_id, sale_id], map: "pk_sale_product")
 }

@@ -42,23 +42,10 @@ const ProductTable: React.FC<Props> = ({ products }) => {
         });
     
         if (response.ok) {
-            // Retrieve the updated product data from the server
-            // const updatedProductResponse = await fetch(`/api/products/${productId}`);
-            // const updatedProduct = await updatedProductResponse.json();
-
-            // // Update the corresponding row in the table with the new data
-            // const row = document.getElementById(`row-${productId}`);
-            // const nameCell = row.querySelector(`#name-${productId}`) as HTMLTableCellElement;
-            // const stockCell = row.querySelector(`#stock-${productId}`) as HTMLTableCellElement;
-            // const priceCell = row.querySelector(`#price-${productId}`) as HTMLTableCellElement;
-
-            // nameCell.textContent = updatedProduct.product_name;
-            // stockCell.textContent = updatedProduct.stock_amount.toString();
-            // priceCell.textContent = updatedProduct.price.toString();
-
             // Update the editableRows state to indicate that this row is no longer editable
             setEditableRows({ ...editableRows, [productId]: false });
-            alert("Success");
+            alert("Update Success");
+            await Router.push('/');
         }
       } else {
         // Set this row as editable
@@ -66,12 +53,18 @@ const ProductTable: React.FC<Props> = ({ products }) => {
       }
     }
 
-  const handleDelete = (productId: string) => {
+  async function handleDelete(productId: string) {
       if (editableRows[productId]) {
           // Handle cancel update logic here
           setEditableRows({ ...editableRows, [productId]: false });
       } else {
           // Implement the delete logic here
+          if(confirm("Are you sure you want to delete?")){
+            const response = await fetch(`/api/post/${productId}`, {
+            method: 'DELETE',
+            });
+            Router.push('/');
+          }
       }
   };
     return (

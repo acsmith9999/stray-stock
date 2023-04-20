@@ -29,7 +29,6 @@ const Blog: React.FC<Props> = (props) => {
 
   const {data: session} = useSession();
 
-
   const [pname, setPName] = useState('');
   const [pstock, setPStock] = useState(0);
   const [pprice, setPPrice] = useState(0);
@@ -38,16 +37,21 @@ const Blog: React.FC<Props> = (props) => {
     e.preventDefault();
     try {
       const body = {pname, pstock, pprice};
-      await fetch('api/post', {
+      const res = await fetch('api/post', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify(body),
       });
       await Router.push('/');
+      setPName("");
+      setPStock(0);
+      setPPrice(0);
     } catch (error) {
       console.error(error);
     }
+
   }
+
   // const feed = JSON.parse(props.body);
   if (!session) {
     return (
@@ -68,28 +72,37 @@ const Blog: React.FC<Props> = (props) => {
 
 
       <div>
-        <form onSubmit={submitNewProduct}>
+        <form onSubmit={submitNewProduct} id="newProductForm">
           <h2>Add new product</h2>
+          <label>Product name: </label>
           <input
             autoFocus
             onChange={(e) => setPName(e.target.value)}
             placeholder="Name"
             type="text"
             value={pname}
+            id="pname"
           />
+          <label>Stock Amount: </label>
           <input
             onChange={(e) => setPStock(parseInt(e.target.value))}
             placeholder="In Stock"
             type="number"
+            min="0"
             value={pstock}
+            id="pstock"
           />
+          <label>Price: </label>
           <input
             onChange={(e) => setPPrice(parseFloat(e.target.value))}
             placeholder="Price"
             type="number"
+            min="0"
             value={pprice}
+            id="pprice"
           />
           <input disabled={!pname || !pstock || !pprice} type="submit" value="Add Product" />
+
         </form>
       </div>
 
