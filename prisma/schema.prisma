@@ -11,6 +11,7 @@ model components {
   component_id           BigInt                   @id @default(autoincrement())
   component_name         String?                  @db.String(50)
   stock_amount           BigInt?
+  price                 Decimal              @default(0) @db.Decimal
   product_components     product_components[]
   stock_order_components stock_order_components[]
 }
@@ -25,8 +26,8 @@ model components_suppliers {
 model product_components {
   product_id         BigInt
   component_id       BigInt
-  component_quantity BigInt?
-  components         components @relation(fields: [component_id], references: [component_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_component")
+  component_quantity BigInt                   @default(1)
+  components         components @relation(fields: [component_id], references: [component_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_component")
   products           products   @relation(fields: [product_id], references: [product_id], onDelete: Cascade, onUpdate: Cascade, map: "fk_product")
 
   @@id([product_id, component_id], map: "pk_product_components")

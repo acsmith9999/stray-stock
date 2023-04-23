@@ -1,13 +1,14 @@
 import React, {useState, useEffect} from "react";
 import Router from "next/router";
-import ReactMarkdown from "react-markdown";
-import getServerSideProps from "../pages/api/update_product/[id]";
+import Table from "react-bootstrap/Table";
+import Button from "react-bootstrap/Button";
 
 export type ProductProps = {
     product_id: string;
     product_name: string;
     stock_amount: string;
     price: string;
+    product_components: [];
 }
 
 
@@ -18,6 +19,27 @@ type Props = {
 const ProductTable: React.FC<Props> = ({ products }) => {
     const feed = JSON.parse(products);
     const [editableRows, setEditableRows] = useState<{ [key: string]: boolean }>({});
+    const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+    const [sortColumn, setSortColumn] = useState<"product_name" | "stock_amount" | "price">("product_name");
+    function handleSort(column: "product_name" | "stock_amount" | "price"): void {
+        if (column === sortColumn) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortDirection("asc");
+            setSortColumn(column);
+        }
+    }
+
+    const sortedProducts = [...feed].sort((a, b) => {
+        const aValue = a[sortColumn];
+        const bValue = b[sortColumn];
+        if (sortDirection === "asc") {
+            return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+        } else {
+            return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+        }
+    });
+
 
     async function handleUpdate(productId: string): Promise<void> {
       const editable = editableRows[productId];
@@ -60,26 +82,33 @@ const ProductTable: React.FC<Props> = ({ products }) => {
       } else {
           // Implement the delete logic here
           if(confirm("Are you sure you want to delete?")){
-            const response = await fetch(`/api/post/${productId}`, {
+            const response = await fetch(`/api/products/${productId}`, {
             method: 'DELETE',
             });
             Router.push('/');
           }
       }
   };
+
+  async function handleRowClick(productId: string) {
+    await Router.push(`/product_view/${productId}`);
+  }
+
+
     return (
-      <table>
+      <Table striped bordered hover>
         <thead>
             <tr>
-                <th>Name</th>
-                <th>Stock</th>
-                <th>Price</th>
+                <th onClick={() => handleSort("product_name")}>Name</th>
+                <th onClick={() => handleSort("stock_amount")}>Stock</th>
+                <th onClick={() => handleSort("price")}>Price</th>
             </tr>
         </thead>
         <tbody>
-            {feed.map((product) => (
-                <tr key={product.product_id} id={`row-${product.product_id}`}>
-                    <td>
+            {sortedProducts.map((product) => (
+                <tr key={product.product_id} id={`row-${product.product_id}`} >
+                {/* <tr key={product.product_id} id={`row-${product.product_id}`}> */}
+                    <td className="listLink" onClick={() => handleRowClick(product.product_id)}>
                         {editableRows[product.product_id] ? (
                             <input type="text" defaultValue={product.product_name} id={`name-${product.product_id}`}/>
                         ) : (
@@ -101,19 +130,28 @@ const ProductTable: React.FC<Props> = ({ products }) => {
                         )}
                     </td>
                     <td>
-                        <button onClick={() => handleUpdate(product.product_id)}>
-                            {editableRows[product.product_id] ? "Confirm Update" : "Update"}
-                        </button>
+                        <p>{product.product_components}</p>
                     </td>
                     <td>
-                        <button onClick={() => handleDelete(product.product_id)}>
+                        <Button variant="warning" onClick={() => handleUpdate(product.product_id)}>
+                            {editableRows[product.product_id] ? "Confirm Update" : "Update"}
+                        </Button>
+                    </td>
+                    <td>
+                        <Button variant="danger" onClick={() => handleDelete(product.product_id)}>
                             {editableRows[product.product_id] ? "Cancel Update" : "Delete"}
-                        </button>
+                        </Button>
                     </td>
                 </tr>
             ))}
         </tbody>
-    </table>
+        <style jsx>{`
+        .listLink:hover {
+          color: blue;
+          cursor: pointer;
+          text-decoration: underline;
+        }`}</style>
+    </Table>
     );
   };
 

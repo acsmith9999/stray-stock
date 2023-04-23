@@ -1,13 +1,13 @@
-// pages/api/post/[id].ts
+// pages/api/components/[id].ts
 
 import prisma from '../../../lib/prisma';
 
-// DELETE /api/post/:id
+// DELETE /api/components/:id
 export default async function handle(req, res) {
-  const prodId = BigInt(req.query.id);
+  const compId = BigInt(req.query.id);
   if (req.method === 'DELETE') {
-    const post = await prisma.products.delete({
-      where: { product_id: prodId },
+    const post = await prisma.components.delete({
+      where: { component_id: compId },
     });
     const json = JSON.stringify(post, (key, value) => {
         if (typeof value === 'bigint') {
