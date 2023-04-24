@@ -60,7 +60,7 @@ const authOptions: NextAuthOptions = {
         return {
           id: "1234",
           name: "Stray Leaves",
-          username: "strayleaves",
+          username: "Stray Leaves",
           role: "admin",
         };
       },
