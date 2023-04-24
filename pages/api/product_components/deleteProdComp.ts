@@ -2,8 +2,8 @@ import prisma from '../../../lib/prisma';
 
 // DELETE 
 export default async function handle(req, res) {
-  const prodId = BigInt(req.query.pid);
-  const compId = BigInt(req.query.cid)
+  const prodId = BigInt(req.body.pid);
+  const compId = BigInt(req.body.cid);
   if (req.method === 'DELETE') {
     const post = await prisma.product_components.delete({
         where: { 

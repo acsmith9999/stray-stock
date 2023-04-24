@@ -82,7 +82,13 @@ const ComponentDetail: React.FC<Props> = ({component,productComponents,allProduc
     id: product.product_id,
     label: product.products.product_name,
   }))
+
   const [selectedItems, setSelectedItems] = React.useState(parsedSelectedItems);
+
+  const [toCreate, setToCreate] = React.useState([]);
+
+  const [toDelete, setToDelete] = React.useState([]);
+
   const parsedAllProductsFull = JSON.parse(allProducts);
   const parsedAllProducts = parsedAllProductsFull.map((product) => ({
     id: product.product_id,
@@ -90,40 +96,90 @@ const ComponentDetail: React.FC<Props> = ({component,productComponents,allProduc
   }))
 
 
-  const [changed, setChanged] = useState(false);
-
   function handleSelectedItemsChange(selectedItems) {
     setSelectedItems(selectedItems);
-    if (selectedItems.length !== parsedSelectedItems.length) {
-      setChanged(true);
-    } else {
-      for (let i = 0; i < selectedItems.length; i++) {
-        if (selectedItems[i].id !== parsedSelectedItems[i].id) {
-          setChanged(true);
-          break;
-        }
-      }
-    }
-    console.log(changed);
+
+    setToCreate(selectedItems.filter(item => {
+      return !parsedSelectedItems.some(parsedItem => {
+        return parsedItem.id === item.id && parsedItem.label === item.label;
+      });
+    }))
+
+    setToDelete(parsedSelectedItems.filter(item => {
+      return !selectedItems.some(parsedItem => {
+        return parsedItem.id === item.id && parsedItem.label === item.label;
+      });
+    }))
   }
 
-  function handleApplyLinkedProducts(){
-    //foreach product in selectedItems, check if record exists in product_components, and create if no
-    const toCreate = selectedItems.filter(item => !parsedSelectedItems.includes(item));
-    console.log(toCreate);
+  async function handleApplyLinkedProducts(){
+    toCreate.forEach((item) => {
+      submitNewProdComp(item);
+    })
 
-    //foreach product in nonSelectedItems, check if record exists in product_components, and delete if yes
-    const toDelete = parsedSelectedItems.filter(item => !selectedItems.includes(item));
-    console.log(toDelete);
+    toDelete.forEach((item) => {
+      deleteProdComp(item);
+    })
   }
 
-  async function handleUpdateProdComp(pid: string, cid: string){
+const submitNewProdComp = async (item) => {
+  try{
+    let pid = item.id;
+    let cid = parsedComponent.component_id;
+    const body = {pid, cid};
+    await fetch('../api/product_components', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body),
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  await Router.push(`/component_view/${parsedComponent.component_id}`);
+}
+
+async function deleteProdComp(item) {
+  try{
+    let pid = item.id;
+    let cid = parsedComponent.component_id;
+    const body = {pid, cid};
+    await fetch('../api/product_components/deleteProdComp', {
+      method:'DELETE',
+      headers: {'Content-Type': 'application/json'},
+      body:JSON.stringify(body)
+    });
+  }
+  catch (error){
+    console.log(error);
+  }
+  await Router.push(`/component_view/${parsedComponent.component_id}`);
+
+}
+
+  async function handleUpdateProdComp(pid: string): Promise<void>{
     //update amount of components used for a product
+    const amountInput = document.getElementById(`amount-${pid}`) as HTMLInputElement;
+    const amount = parseInt(amountInput.value);
+    const cid = parsedComponent.component_id;
+
+    const response = await fetch('../api/product_components/updateProdComp', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({cid, pid, amount}),
+    });
+
+    if (response.ok){
+      alert("Update Success");
+      await Router.push(`/component_view/${parsedComponent.component_id}`);
+    }
   }
 
   async function handleClick(productId: string) {
     await Router.push(`/product_view/${productId}`);
   }
+
   if (!session) {
     return (
       <Layout>
@@ -156,8 +212,8 @@ const ComponentDetail: React.FC<Props> = ({component,productComponents,allProduc
                           <li className="listLink" key={product.products.product_name} onClick={() => handleClick(product.products.product_id)}>
                             {product.products.product_name}: {product.component_quantity}x
                           </li>
-                          <input id="amount" type="number" min="0"></input>
-                          <Button onClick={() => handleUpdateProdComp}>Update</Button>
+                          <input id={`amount-${product.products.product_id}`} type="number" min="0" defaultValue={product.component_quantity}></input>
+                          <Button onClick={() => handleUpdateProdComp(product.products.product_id)}>Update</Button>
                         </div>
                       ))}
                     </ul>
@@ -184,7 +240,7 @@ const ComponentDetail: React.FC<Props> = ({component,productComponents,allProduc
                 onChange={handleSelectedItemsChange}
               />
               <br></br>
-              <Button disabled={changed} onClick={handleApplyLinkedProducts}>Apply changes</Button>
+              <Button onClick={handleApplyLinkedProducts}>Apply changes</Button>
             </div>
             <br></br>
             <div>
@@ -206,3 +262,4 @@ const ComponentDetail: React.FC<Props> = ({component,productComponents,allProduc
 
 
 export default ComponentDetail
+
