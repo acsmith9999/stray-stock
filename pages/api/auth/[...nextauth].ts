@@ -22,6 +22,12 @@
 
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { isNullOrUndefined } from "util";
+import dotenv from 'dotenv';
+
+dotenv.config();
+const USER = process.env.CRED_USERNAME;
+const PASS = process.env.CRED_PASSWORD;
 
 const authOptions: NextAuthOptions = {
   session: {
@@ -41,9 +47,14 @@ const authOptions: NextAuthOptions = {
         };
         // perform you login logic
         // find out user from db
-        if (username !== 'strayleaves' || password !== '1234') {
-          throw new Error("invalid credentials");
+        if (!isNullOrUndefined(USER) && !isNullOrUndefined(PASS)){
+          if (username !== USER || password !== PASS) {
+            throw new Error("invalid credentials: check env");
+          }
         }
+        // if (username !== 'test' || password !== '1234') {
+        //   throw new Error("invalid credentials");
+        // }
 
         // if everything is fine
         return {

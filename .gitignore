@@ -2,4 +2,3 @@ node_modules/
 .next/
 .DS_STORE
 .env
-/pages/api/auth/[...nextauth].ts
