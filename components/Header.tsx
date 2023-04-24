@@ -13,12 +13,12 @@ const Header: React.FC = () => {
 
   let left = (
     <div className="left">
-      {/* <Link href="/">
+      <Link href="/">
         <a className="bold" data-active={isActive('/')}>
-          Feed
+          Home
         </a>
       </Link>
-      <Link href="/components">
+      {/* <Link href="/components">
         <a className="bold" data-active={isActive("/components")}>
           Components
         </a>
@@ -210,7 +210,8 @@ const Header: React.FC = () => {
     right = (
       <div className="right">
         <p>
-          {session.user.name} ({session.user.email})
+          Hello, {session.user.name}! 
+          {/* ({session.user.email}) */}
         </p>
         {/* <Link href="/create">
           <button>
